@@ -1,11 +1,5 @@
-import express from 'express'
-import employeesRoutes from './routes/employees.routes.js'
-import indexRoutes from './routes/index.routes.js'
+import app from './app.js'
+import {PORT} from './config.js'
 
-const app = express()
-
-app.use(indexRoutes)
-app.use(employeesRoutes)
-
-app.listen(3000)
-console.log('funciona')
+app.listen(PORT)
+console.log('Funcionando desde el puerto', PORT)
