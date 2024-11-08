@@ -2,17 +2,79 @@ CREATE DATABASE IF NOT EXISTS pelisdb;
 
 USE pelisdb;
 
-CREATE TABLE employee(
-    id INT(11) NOT NULL AUTO_INCREMENT,
-    name VARCHAR(45) DEFAULT NULL, 
-    salary INT(5) DEFAULT NULL,
-    PRIMARY KEY (id)
+CREATE TABLE users (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-DESCRIBE employee;
+CREATE TABLE subscriptions (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(50) NOT NULL,
+    price DECIMAL(10,2) NOT NULL,
+    duration_months INT NOT NULL,
+    description TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 
-INSERT INTO employee VALUES
-(1, 'John', 1000),
-(2, 'Mary', 2000),
-(3, 'Tom', 3000),
-(4, 'Peter', 4000);
+CREATE TABLE user_subscriptions (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT NOT NULL,
+    subscription_id INT NOT NULL,
+    start_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    end_date TIMESTAMP NOT NULL,
+    status ENUM('active', 'cancelled', 'expired') DEFAULT 'active',
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (subscription_id) REFERENCES subscriptions(id)
+);
+
+CREATE TABLE genres (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(50) NOT NULL UNIQUE
+);
+
+CREATE TABLE movies (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    duration INT NOT NULL, -- in minutes
+    release_year YEAR,
+    video_url VARCHAR(255) NOT NULL,
+    thumbnail_url VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE movie_genres (
+    movie_id INT NOT NULL,
+    genre_id INT NOT NULL,
+    PRIMARY KEY (movie_id, genre_id),
+    FOREIGN KEY (movie_id) REFERENCES movies(id),
+    FOREIGN KEY (genre_id) REFERENCES genres(id)
+);
+
+CREATE TABLE profiles (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT NOT NULL,
+    name VARCHAR(50) NOT NULL,
+    avatar_url VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+CREATE TABLE watchlist (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    profile_id INT NOT NULL,
+    movie_id INT NOT NULL,
+    added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (profile_id) REFERENCES profiles(id),
+    FOREIGN KEY (movie_id) REFERENCES movies(id)
+);
+
+INSERT INTO genres (name) VALUES 
+('Action'),
+('Science Fiction'),
+('Drama'),
+('Comedy'),
+('Horror');
