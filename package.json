@@ -5,6 +5,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
+    "backup": "node backup.js",
     "dev": "nodemon src/index.js",
     "start": "node src/index.js"
   },

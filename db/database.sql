@@ -43,6 +43,7 @@ CREATE TABLE movies (
     release_year YEAR,
     video_url VARCHAR(255) NOT NULL,
     thumbnail_url VARCHAR(255),
+    video_qualities JSON DEFAULT NULL COMMENT '{"480p": "url", "720p": "url", "1080p": "url", "4k": "url"}',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -68,6 +69,38 @@ CREATE TABLE watchlist (
     profile_id INT NOT NULL,
     movie_id INT NOT NULL,
     added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (profile_id) REFERENCES profiles(id),
+    FOREIGN KEY (movie_id) REFERENCES movies(id)
+);
+
+CREATE TABLE ratings (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    profile_id INT NOT NULL,
+    movie_id INT NOT NULL,
+    rating ENUM('thumbs_up', 'thumbs_down') NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (profile_id) REFERENCES profiles(id),
+    FOREIGN KEY (movie_id) REFERENCES movies(id)
+);
+
+CREATE TABLE viewing_history (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    profile_id INT NOT NULL,
+    movie_id INT NOT NULL,
+    watched_time INT NOT NULL, -- tiempo en segundos
+    completed BOOLEAN DEFAULT FALSE,
+    last_watched TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (profile_id) REFERENCES profiles(id),
+    FOREIGN KEY (movie_id) REFERENCES movies(id)
+);
+
+CREATE TABLE viewing_progress (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    profile_id INT NOT NULL,
+    movie_id INT NOT NULL,
+    progress_seconds INT NOT NULL DEFAULT 0,
+    last_watched TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    completed BOOLEAN DEFAULT FALSE,
     FOREIGN KEY (profile_id) REFERENCES profiles(id),
     FOREIGN KEY (movie_id) REFERENCES movies(id)
 );
