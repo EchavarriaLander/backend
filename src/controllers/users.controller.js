@@ -7,32 +7,26 @@ export const registerUser = async (req, res) => {
     const { name, email, password } = req.body
 
     try {
-        // Check if user exists
-        const [existingUser] = await pool.query('SELECT id FROM users WHERE email = ?', [email])
-        if (existingUser.length > 0) {
+        // Verificar si el email ya existe
+        const [existingUsers] = await pool.query('SELECT * FROM users WHERE email = ?', [email])
+        if (existingUsers.length > 0) {
             return res.status(400).json({ message: 'Email already registered' })
         }
 
-        // Hash password
+        // Encriptar contraseña
         const salt = await bcrypt.genSalt(10)
         const hashedPassword = await bcrypt.hash(password, salt)
 
-        // Create user
+        // Crear usuario
         const [result] = await pool.query(
             'INSERT INTO users (name, email, password) VALUES (?, ?, ?)',
             [name, email, hashedPassword]
         )
 
-        // Create default profile
-        await pool.query(
-            'INSERT INTO profiles (user_id, name) VALUES (?, ?)',
-            [result.insertId, 'Default Profile']
-        )
-
-        // Generate token
+        // Generar token
         const token = jwt.sign({ id: result.insertId }, JWT_SECRET, { expiresIn: '1d' })
 
-        res.json({ token })
+        res.status(201).json({ token })
     } catch (error) {
         return res.status(500).json({
             message: 'Error registering user'
