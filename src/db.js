@@ -13,4 +13,14 @@ export const pool = createPool({
   user: DB_USER,
   password: DB_PASS,
   database: DB_NAME,
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0,
+  enableKeepAlive: true,
+  keepAliveInitialDelay: 0
 })
+
+pool.on('error', (err) => {
+    console.error('Unexpected error on idle client', err);
+    process.exit(-1);
+});

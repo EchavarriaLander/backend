@@ -11,6 +11,8 @@ import ratingsRoutes from './routes/ratings.routes.js'
 import viewingProgressRoutes from './routes/viewingProgress.routes.js'
 import viewingHistoryRoutes from './routes/viewingHistory.routes.js'
 import continueRoutes from './routes/continue.routes.js'
+import paymentsRoutes from './routes/payments.routes.js'
+import { errorHandler } from './middlewares/error.middleware.js'
 
 const app = express()
 
@@ -28,6 +30,9 @@ app.use('/api', ratingsRoutes)
 app.use('/api', viewingProgressRoutes)
 app.use('/api', viewingHistoryRoutes)
 app.use('/api', continueRoutes)
+app.use('/api', paymentsRoutes)
+
+app.use(errorHandler)
 
 app.use((req, res) => {
   res.status(404).json({
