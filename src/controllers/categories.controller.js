@@ -2,16 +2,8 @@ export const getHomeCategories = async (req, res) => {
     try {
         const categories = [
             {
-                title: "Continue Watching",
-                movies: await getContinueWatching(req.profile.id)
-            },
-            {
                 title: "Popular on Netflix",
                 movies: await getPopularMovies()
-            },
-            {
-                title: "Because you watched X",
-                movies: await getRelatedMovies(req.profile.id)
             },
             {
                 title: "New Releases",

@@ -73,20 +73,28 @@ export const createMovie = async (req, res) => {
 
 export const deleteMovie = async (req, res) => {
     try {
-        // Primero eliminamos los géneros asociados
+        await pool.query('START TRANSACTION')
+
+        // Eliminar de watchlist
+        await pool.query('DELETE FROM watchlist WHERE movie_id = ?', [req.params.id])
+        
+        // Eliminar géneros asociados
         await pool.query('DELETE FROM movie_genres WHERE movie_id = ?', [req.params.id])
         
-        // Luego eliminamos la película
+        // Eliminar la película
         const [result] = await pool.query('DELETE FROM movies WHERE id = ?', [req.params.id])
     
         if (result.affectedRows <= 0) {
+            await pool.query('ROLLBACK')
             return res.status(404).json({
                 message: 'Movie not found'
             })
         }
     
+        await pool.query('COMMIT')
         res.sendStatus(204)
     } catch (error) {
+        await pool.query('ROLLBACK')
         return res.status(500).json({
             message: 'Error deleting movie'
         })

@@ -61,6 +61,7 @@ CREATE TABLE profiles (
     user_id INT NOT NULL,
     name VARCHAR(50) NOT NULL,
     avatar_url VARCHAR(255),
+    date_of_birth DATE NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
@@ -70,38 +71,6 @@ CREATE TABLE watchlist (
     profile_id INT NOT NULL,
     movie_id INT NOT NULL,
     added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (profile_id) REFERENCES profiles(id),
-    FOREIGN KEY (movie_id) REFERENCES movies(id)
-);
-
-CREATE TABLE ratings (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    profile_id INT NOT NULL,
-    movie_id INT NOT NULL,
-    rating ENUM('thumbs_up', 'thumbs_down') NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (profile_id) REFERENCES profiles(id),
-    FOREIGN KEY (movie_id) REFERENCES movies(id)
-);
-
-CREATE TABLE viewing_history (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    profile_id INT NOT NULL,
-    movie_id INT NOT NULL,
-    watched_time INT NOT NULL, -- tiempo en segundos
-    completed BOOLEAN DEFAULT FALSE,
-    last_watched TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (profile_id) REFERENCES profiles(id),
-    FOREIGN KEY (movie_id) REFERENCES movies(id)
-);
-
-CREATE TABLE viewing_progress (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    profile_id INT NOT NULL,
-    movie_id INT NOT NULL,
-    progress_seconds INT NOT NULL DEFAULT 0,
-    last_watched TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    completed BOOLEAN DEFAULT FALSE,
     FOREIGN KEY (profile_id) REFERENCES profiles(id),
     FOREIGN KEY (movie_id) REFERENCES movies(id)
 );
@@ -139,8 +108,7 @@ INSERT INTO genres (name) VALUES
 
 INSERT INTO subscription_plans (name, price, max_profiles, max_devices, quality_level, can_download) VALUES 
 ('Plan Básico', 9.99, 1, 1, 'SD', false),
-('Plan Estándar', 14.99, 2, 2, 'HD', true),
-('Plan Premium', 19.99, 5, 4, '4K', true);
+('Plan Estándar', 14.99, 2, 2, 'HD', true);
 
 INSERT INTO movies (title, description, duration, release_year, video_url, thumbnail_url) VALUES 
 ('The Matrix', 'A computer programmer discovers a mysterious world...', 136, 1999, 'http://example.com/matrix.mp4', 'http://example.com/matrix.jpg'),

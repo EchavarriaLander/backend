@@ -3,15 +3,9 @@ import { pool } from '../db.js'
 export const getProfiles = async (req, res) => {
     try {
         const [profiles] = await pool.query(`
-            SELECT p.*, 
-                   COUNT(DISTINCT vp.movie_id) as movies_watched,
-                   GROUP_CONCAT(DISTINCT g.name) as favorite_genres
+            SELECT p.*
             FROM profiles p
-            LEFT JOIN viewing_progress vp ON p.id = vp.profile_id
-            LEFT JOIN movie_genres mg ON vp.movie_id = mg.movie_id
-            LEFT JOIN genres g ON mg.genre_id = g.id
             WHERE p.user_id = ?
-            GROUP BY p.id
         `, [req.userId])
         
         res.json(profiles)
@@ -21,7 +15,7 @@ export const getProfiles = async (req, res) => {
 }
 
 export const createProfile = async (req, res) => {
-    const { name, avatar_url } = req.body
+    const { name, avatar_url, date_of_birth } = req.body
     try {
         // Verificar límite de perfiles (ejemplo: máximo 5)
         const [existingProfiles] = await pool.query(
@@ -34,14 +28,15 @@ export const createProfile = async (req, res) => {
         }
 
         const [result] = await pool.query(
-            'INSERT INTO profiles (user_id, name, avatar_url) VALUES (?, ?, ?)',
-            [req.userId, name, avatar_url]
+            'INSERT INTO profiles (user_id, name, avatar_url, date_of_birth) VALUES (?, ?, ?, ?)',
+            [req.userId, name, avatar_url, date_of_birth]
         )
         
         res.status(201).json({
             id: result.insertId,
             name,
-            avatar_url
+            avatar_url,
+            date_of_birth
         })
     } catch (error) {
         res.status(500).json({ message: 'Error creating profile' })
