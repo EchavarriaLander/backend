@@ -1,9 +1,17 @@
-import { Router } from 'express'
-import { registerUser, loginUser } from '../controllers/users.controller.js'
+import { Router } from 'express';
+import { registerUser } from '../controllers/users.controller.js';
+import { createProfile, getProfiles, updateProfile, deleteProfile } from '../controllers/profiles.controller.js';
+import { authRequired } from '../middlewares/validateToken.js';
 
-const router = Router()
+const router = Router();
 
-router.post('/auth/register', registerUser)
-router.post('/auth/login', loginUser)
+// Rutas de autenticación
+router.post('/users/register', registerUser);
 
-export default router 
+// Rutas de perfiles
+router.get('/users/profiles', authRequired, getProfiles);
+router.post('/users/profiles', authRequired, createProfile);
+router.put('/users/profiles/:id', authRequired, updateProfile);
+router.delete('/users/profiles/:id', authRequired, deleteProfile);
+
+export default router;

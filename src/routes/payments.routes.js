@@ -1,10 +1,10 @@
 import { Router } from 'express'
 import { createPayment, getPaymentHistory } from '../controllers/payments.controller.js'
-import { verifyToken } from '../middlewares/auth.middleware.js'
+import { authRequired } from '../middlewares/validateToken.js'
 
 const router = Router()
 
-router.post('/payments', verifyToken, createPayment)
-router.get('/payments/history', verifyToken, getPaymentHistory)
+router.post('/payments/create', authRequired, createPayment)
+router.get('/payments/history', authRequired, getPaymentHistory)
 
 export default router 

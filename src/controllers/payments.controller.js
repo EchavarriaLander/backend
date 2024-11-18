@@ -6,7 +6,7 @@ export const createPayment = async (req, res) => {
     try {
         // Verificar que el plan existe
         const [plan] = await pool.query(
-            'SELECT * FROM subscriptions WHERE id = ?',
+            'SELECT * FROM subscription_plans WHERE id = ?',
             [subscription_plan_id]
         )
         
@@ -39,11 +39,11 @@ export const getPaymentHistory = async (req, res) => {
         const [payments] = await pool.query(
             `SELECT p.*, s.name as plan_name 
              FROM payments p
-             JOIN subscriptions s ON p.subscription_plan_id = s.id
+             JOIN subscription_plans s ON p.subscription_plan_id = s.id
              WHERE p.user_id = ?
              ORDER BY p.created_at DESC`,
             [req.userId]
-        )
+        );
         
         res.json(payments)
     } catch (error) {

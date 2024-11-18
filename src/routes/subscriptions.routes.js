@@ -1,11 +1,10 @@
 import { Router } from 'express'
-import { getSubscriptionPlans, subscribeToPlan, getUserSubscription } from '../controllers/subscriptionPlans.controller.js'
-import { verifyToken } from '../middlewares/auth.middleware.js'
+import { subscribeToPlan, getSubscriptionPlans } from '../controllers/subscriptionPlans.controller.js'
+import { authRequired } from '../middlewares/validateToken.js'
 
 const router = Router()
 
-router.get('/subscription-plans', getSubscriptionPlans)
-router.post('/subscribe', verifyToken, subscribeToPlan)
-router.get('/subscription/current', verifyToken, getUserSubscription)
+router.get('/subscriptions/plans', authRequired, getSubscriptionPlans)
+router.post('/subscriptions/subscribe', authRequired, subscribeToPlan)
 
-export default router 
+export default router

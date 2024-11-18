@@ -11,79 +11,76 @@ export const getSubscriptionPlans = async (req, res) => {
 }
 
 export const subscribeToPlan = async (req, res) => {
-    const { plan_id, payment_method } = req.body
-    const user_id = req.userId
+    const { 
+        plan_id, 
+        payment_method,
+        card_number,
+        card_holder,
+        expiration_date,
+        cvv 
+    } = req.body;
+    const user_id = req.userId;
 
     try {
-        await pool.query('START TRANSACTION')
+        await pool.query('START TRANSACTION');
 
         // Verificar que el plan existe
         const [plan] = await pool.query(
-            'SELECT * FROM subscriptions WHERE id = ?', 
+            'SELECT * FROM subscription_plans WHERE id = ?', 
             [plan_id]
-        )
+        );    
         
         if (plan.length === 0) {
-            await pool.query('ROLLBACK')
-            return res.status(404).json({ message: 'Plan not found' })
+            await pool.query('ROLLBACK');
+            return res.status(404).json({ message: 'Plan not found' });
         }
 
-        // Verificar si ya tiene una suscripción activa
-        const [activeSub] = await pool.query(
-            `SELECT * FROM user_subscriptions 
-             WHERE user_id = ? AND status = 'active' 
-             AND end_date > NOW()`,
-            [user_id]
-        )
-
-        if (activeSub.length > 0) {
-            await pool.query('ROLLBACK')
-            return res.status(400).json({ message: 'User already has an active subscription' })
-        }
+        // Guardar método de pago
+        const [paymentMethod] = await pool.query(
+            `INSERT INTO payment_methods 
+             (user_id, card_number, card_holder, expiration_date, cvv) 
+             VALUES (?, ?, ?, ?, ?)`,
+            [user_id, card_number, card_holder, expiration_date, cvv]
+        );
 
         // Registrar el pago
-        const [payment] = await pool.query(
-            `INSERT INTO payments (user_id, subscription_plan_id, amount, payment_method, status) 
+        await pool.query(
+            `INSERT INTO payments 
+             (user_id, subscription_plan_id, amount, payment_method, status) 
              VALUES (?, ?, ?, ?, 'completed')`,
             [user_id, plan_id, plan[0].price, payment_method]
-        )
-
-        // Calcular fecha fin (1 mes desde ahora)
-        const end_date = new Date()
-        end_date.setMonth(end_date.getMonth() + 1)
+        );
 
         // Crear la suscripción
         await pool.query(
             `INSERT INTO user_subscriptions 
              (user_id, subscription_id, start_date, end_date, status) 
-             VALUES (?, ?, NOW(), ?, 'active')`,
-            [user_id, plan_id, end_date]
-        )
+             VALUES (?, ?, NOW(), DATE_ADD(NOW(), INTERVAL 1 MONTH), 'active')`,
+            [user_id, plan_id]
+        );
 
-        // Confirmar transacción
-        await pool.query('COMMIT')
-
+        await pool.query('COMMIT');
+        
         res.status(201).json({ 
-            message: 'Subscription successful',
-            payment_id: payment.insertId
-        })
-
+            message: 'Subscription successful'
+        });
     } catch (error) {
-        await pool.query('ROLLBACK')
+        await pool.query('ROLLBACK');
         console.error('Subscription error:', error);
         res.status(500).json({ 
             message: 'Error processing subscription',
             error: error.message 
-        })
+        });
     }
-}
+};
+
 
 export const getUserSubscription = async (req, res) => {
     try {
         const [subscription] = await pool.query(`
             SELECT s.*, us.start_date, us.end_date, us.status
             FROM user_subscriptions us
-            JOIN subscriptions s ON us.subscription_id = s.id
+            JOIN subscription_plans s ON us.subscription_id = s.id
             WHERE us.user_id = ? 
             AND us.status = 'active'
             AND us.end_date > NOW()

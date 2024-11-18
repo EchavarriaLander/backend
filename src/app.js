@@ -1,5 +1,6 @@
 import express from 'express'
 import cors from 'cors'
+import cookieParser from 'cookie-parser'
 import indexRoutes from './routes/index.routes.js'
 import moviesRoutes from './routes/movies.routes.js'
 import usersRoutes from './routes/users.routes.js'
@@ -14,11 +15,12 @@ const app = express()
 
 // Configuración de CORS
 app.use(cors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    origin: 'http://localhost:5173',
     credentials: true
 }))
 
 app.use(express.json())
+app.use(cookieParser())
 
 app.use(indexRoutes)
 app.use('/api', moviesRoutes)
